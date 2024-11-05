@@ -1,5 +1,43 @@
 ﻿@page "/"
+@page "/customer"
+@using DeeplinkTest.Extensions
 
-<h1>Hello, world!</h1>
+<NavLink @onclick="() => NavigationManager.Refresh(true)">
+    <p class="text-decoration-underline">
+        Click here to force a refresh / reload for the current page with query parameters
+    </p>
+</NavLink>
 
-Welcome to your new app.
+<NavLink @onclick="TestIfUrlIsBaseOfPage">
+    <p class="text-decoration-underline">
+        Click here to print example data to the console
+    </p>
+</NavLink>
+
+@code {
+
+    [Inject] NavigationManager NavigationManager { get; set; }
+
+    protected override void OnInitialized()
+    {
+        // Just to add a query parameter to the current URL
+        NavigationManager.NavigateTo("/customer?weight=62.5", forceLoad: false, replace: true);
+    }
+
+    private void TestIfUrlIsBaseOfPage()
+    {
+        var urlWithoutQueryParameterWithDot = "https://example.com/customer?weight=62";
+        var urlWithQueryParameterWithDot = "https://example.com/customer?weight=62.5";
+
+        var isAddressWithoutDotBaseOfPage = new Uri("https://example.com").IsBaseOfPage(urlWithoutQueryParameterWithDot); // true
+        var isAddressWithDotBaseOfPage = new Uri("https://example.com").IsBaseOfPage(urlWithQueryParameterWithDot); // false but expected true
+
+        var isAddressWithoutDotAFilePath = Path.HasExtension(urlWithoutQueryParameterWithDot); // false
+        var isAddressWithDotAFilePath = Path.HasExtension(urlWithQueryParameterWithDot); // true but expected false
+
+        Console.WriteLine($"{urlWithoutQueryParameterWithDot}: {nameof(isAddressWithoutDotBaseOfPage)}: {isAddressWithoutDotBaseOfPage}");
+        Console.WriteLine($"{urlWithQueryParameterWithDot}: {nameof(isAddressWithDotBaseOfPage)}: {isAddressWithDotBaseOfPage}");
+        Console.WriteLine($"{urlWithoutQueryParameterWithDot}: {nameof(isAddressWithoutDotAFilePath)}: {isAddressWithoutDotAFilePath}");
+        Console.WriteLine($"{urlWithQueryParameterWithDot}: {nameof(isAddressWithDotAFilePath)}: {isAddressWithDotAFilePath}");
+    }
+}
